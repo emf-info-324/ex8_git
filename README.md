@@ -1,209 +1,142 @@
-# Exercice — Git collaboratif en binôme (GitHub Flow)
+# Exercice — Git collaboratif en binôme
 
-**Modalité**
+**Contexte : GitHub Classroom · GitHub Flow**
 
-* Par groupe de 2 (Dev A / Dev B)
-* Repo fourni via **GitHub Classroom**
-* Règle : **aucun commit direct sur `main`** (branch protection active)
+**Règles**
 
-**Fichiers**
+* Travail **uniquement sur des branches `feature/...`**
+* Intégration **uniquement via Pull Request**
+* **Aucun commit direct sur `main`**
 
-* `app.txt` (fourni dans le repo) contenant au départ :
+**Fichier de départ**
+`app.txt` :
 
-```txt
+```
+TITLE: Demo App
 Hello World
+END
 ```
+
 ---
 
-## Étape 0 — Setup (ensemble)
+## Étape 1 — Branches et Pull Requests (sans merge)
 
-1. Chaque binôme récupère son repo Classroom
-2. Clone en local
-3. Vérifie que `main` est à jour :
-
-```bash
-git checkout main
-git pull
-```
----
-
-## Étape 1 — Création de branches + 2 PR indépendantes
+Objectif : créer des PR **sans conflit**.
 
 ### Dev A
 
-1. Crée une branche `feature/header`
-2. Modifie `app.txt` en ajoutant à la fin :
-
-```txt
-=== HEADER ===
-```
-
-3. Commit + push + PR vers `main`
-4. Création de la PR vers `main` (sur Github)
-5. Merge de la PR (sur Github)
-
-> :warning: Pour cet exerice, nous ferons le merge directement et sans approbation.
+* Crée une branche `feature/header`
+* Modifie **uniquement la première ligne** du fichier
+* Ouvre une Pull Request vers `main`
+* **Ne merge pas la PR**
 
 ### Dev B
 
-1. Crée une branche `feature/footer`
-2. Modifie `app.txt` en ajoutant à la fin :
+* Crée une branche `feature/footer`
+* Modifie **uniquement la dernière ligne** du fichier
+* Ouvre une Pull Request vers `main`
+* **Ne merge pas la PR**
 
-```txt
-=== FOOTER ===
-```
+👉 À la fin de l’étape 1 :
 
-3. Commit + push + PR vers `main`
-
-✅ Objectifs : **création de branche**, **push**, **PR**
-
----
-
-## Étape 2 — Merge via PR (pas de commit direct)
-
-1. Dev A fait merger **sa PR** (via GitHub)
-2. Dev B **ne merge pas** tout de suite : il doit d’abord **mettre à jour sa branche** avec `main` (Étape 3)
-
-✅ Objectif : respecter le **flux GitHub Flow** (intégration uniquement via PR)
+* 2 PR ouvertes
+* aucune erreur
+* aucun conflit
+* `main` n’a pas changé
 
 ---
 
-## Étape 3 — Mise à jour de branche : merge vs rebase
+## Étape 2 — Merge + rebase (observation des effets)
+
+Objectif : comprendre **ce que fait réellement un rebase**.
+
+### Déroulé
+
+1. Dev A fait merger **sa PR** sur `main`
+2. Dev B **ne merge pas encore**
+3. Dev B met à jour **sa branche** par **rebase** sur `main`
+4. Dev B met à jour sa PR, puis la merge
+
+---
+
+### 🔍 Comment **constater les effets du rebase**
+
+Dev B doit observer **avant / après** le rebase :
+
+#### 1) Sur GitHub (Pull Request)
+
+* Avant rebase :
+
+  * la PR indique que la branche est **en retard** sur `main`
+* Après rebase :
+
+  * la PR est **à jour**
+  * aucun commit de merge n’apparaît
+  * la PR devient immédiatement mergeable
+
+#### 2) Dans l’historique des commits
+
+* Les commits de Dev B ont :
+
+  * **changé d’ordre** (ils arrivent après ceux de Dev A)
+  * **changé d’identifiant** (hash différent)
+* L’historique est **linéaire**
+
+#### 3) Dans la lecture de l’historique
+
+* On peut lire les commits **de haut en bas**, sans bifurcation
+* Aucun commit “Merge branch …” n’apparaît
+
+👉 Conclusion attendue par les apprentis :
+
+> *Le rebase rejoue mes commits comme si ma branche avait été créée après la mise à jour de `main`.*
+
+---
+
+## Étape 3 — Conflit volontaire
+
+Objectif : comprendre **quand et pourquoi Git bloque**.
+
+### Dev A
+
+* Crée une nouvelle branche
+* Modifie la **ligne centrale** (`Hello World`)
+* Ouvre une PR et la merge
 
 ### Dev B
 
-Après le merge de Dev A, Dev B met à jour sa branche `feature/footer` :
-
-Option attendue ici : **rebase** (pour historique propre)
-
-```bash
-git checkout feature/footer
-git fetch origin
-git rebase origin/main
-```
-
-Puis push (si nécessaire) :
-
-```bash
-git push --force-with-lease
-```
-
-✅ Objectif : **rebase** + compréhension du **force-with-lease** (sur sa branche uniquement)
+* Crée une nouvelle branche
+* Modifie **la même ligne**
+* Met à jour sa branche avec `main`
+* Résout le conflit
+* Ouvre la PR et la merge
 
 ---
 
-## Étape 4 — Conflit volontaire (toujours via branches + PR)
+## Étape 4 — Reset (soft / hard)
 
-On va provoquer un conflit sur **la même ligne**.
+Objectif : corriger une erreur **sur sa branche**.
 
-### Dev A (sur une nouvelle branche)
-
-1. Crée `feature/change-greeting-A`
-2. Change la première ligne de `app.txt` en :
-
-```txt
-Hello from Dev A
-```
-
-3. Commit + push + PR
-4. Merge PR (via GitHub)
-
-### Dev B (sur sa branche `feature/footer`)
-
-1. Sans re-cloner, modifie **la même ligne** en :
-
-```txt
-Hello from Dev B
-```
-
-2. Commit + push
-3. Rebase sur `main` :
-
-```bash
-git fetch origin
-git rebase origin/main
-```
-
-➡️ Conflit attendu → résolution manuelle dans `app.txt`, puis :
-
-```bash
-git add app.txt
-git rebase --continue
-git push --force-with-lease
-```
-
-✅ Objectifs : **gestion de conflit**, **rebase + résolution**, **push forcé contrôlé**
+* Créer un commit volontairement incorrect
+* Annuler le commit en conservant les modifications
+* Refaire l’erreur
+* Annuler le commit **et** les modifications
 
 ---
 
-## Étape 5 — Reset (sur branche uniquement)
+## Étape 5 — Restore
 
-### Dev A (ou Dev B, peu importe)
+Objectif : comprendre la différence entre **working tree** et **index**.
 
-Sur une branche `feature/reset-practice` :
-
-1. Fais un “mauvais commit” (ex. ajoute une ligne `BAD LINE`)
-2. Montre `git log --oneline`
-
-#### 5.1 Reset soft
-
-Annule le commit **en gardant les changements prêts à recommit** :
-
-```bash
-git reset --soft HEAD~1
-```
-
-➡️ Recommit avec un message correct, puis push.
-
-#### 5.2 Reset hard
-
-Refais une modification “erreur”, commit, puis supprime **commit + modifs** :
-
-```bash
-git reset --hard HEAD~1
-```
-
-✅ Objectifs : différence **soft vs hard** (et rappel : sur branche perso)
+* Annuler une modification non indexée
+* Retirer un fichier de l’index sans perdre la modification
 
 ---
 
-## Étape 6 — Restore (working tree vs staging)
+## Ce que vous devez être capables d’expliquer à la fin
 
-Sur une branche `feature/restore-practice` :
-
-1. Modifie `app.txt` sans add, puis annule :
-
-```bash
-git restore app.txt
-```
-
-2. Modifie `app.txt`, puis :
-
-```bash
-git add app.txt
-```
-
-3. Retire du staging (sans perdre la modif) :
-
-```bash
-git restore --staged app.txt
-```
-
-✅ Objectifs : `restore` + `restore --staged` + compréhension index
-
----
-
-## Livrables attendus
-
-* Au minimum **4 PR** :
-
-  1. header
-  2. footer
-  3. change-greeting-A
-  4. reset/restore practice (au choix, regroupable)
-
-* Dans l’historique, on doit voir :
-
-  * 1 conflit résolu
-  * 1 rebase avec push `--force-with-lease`
-  * l’usage de `reset soft` et `reset hard` (preuve via capture ou copy/paste log)
+* Pourquoi on ne commit jamais sur `main`
+* Différence entre merge et rebase
+* Ce qu’est un conflit et quand il apparaît
+* Quand utiliser reset ou restore
+* Ce que change concrètement un rebase dans l’historique
