@@ -87,8 +87,6 @@ Dev B doit observer **avant / après** le rebase :
 * On peut lire les commits **de haut en bas**, sans bifurcation
 * Aucun commit “Merge branch …” n’apparaît
 
-👉 Conclusion attendue par les apprentis :
-
 > *Le rebase rejoue mes commits comme si ma branche avait été créée après la mise à jour de `main`.*
 
 ---
