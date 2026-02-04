@@ -53,41 +53,36 @@ Objectif : comprendre **ce que fait réellement un rebase**.
 ### Déroulé
 
 1. Dev A fait merger **sa PR** sur `main`
-2. Dev B **ne merge pas encore**
+2. Dev B fait un fetch afin de synchroniser son repo avec le merg de Dev A
 3. Dev B met à jour **sa branche** par **rebase** sur `main`
+```
+git fetch
+git rebase origin/main
+git push --force-with-lease
+```
+👉 L'option --force-with-lease remplace l’historique distant par le tien pour autant  que la branche distante n’a pas changé depuis la dernière fois que tu l’as vue (fetch).
+
 4. Dev B met à jour sa PR, puis la merge
 
 ---
 
 ### 🔍 Comment **constater les effets du rebase**
 
-Dev B doit observer **avant / après** le rebase :
-
-#### 1) Sur GitHub (Pull Request)
+Dev B doit observer **avant / après** le rebase (cette vue est disponible sur GitHub dans Insights/Network):
 
 * Avant rebase :
 
-  * la PR indique que la branche est **en retard** sur `main`
+![alt text](./docs/beforeRebase.png)
+
 * Après rebase :
 
-  * la PR est **à jour**
-  * aucun commit de merge n’apparaît
-  * la PR devient immédiatement mergeable
+![alt text](./docs/afterRebase.png)
 
-#### 2) Dans l’historique des commits
+> L’historique est **linéaire**
 
-* Les commits de Dev B ont :
+* Avec un merge (pour comparaison) :
 
-  * **changé d’ordre** (ils arrivent après ceux de Dev A)
-  * **changé d’identifiant** (hash différent)
-* L’historique est **linéaire**
-
-#### 3) Dans la lecture de l’historique
-
-* On peut lire les commits **de haut en bas**, sans bifurcation
-* Aucun commit “Merge branch …” n’apparaît
-
-> *Le rebase rejoue mes commits comme si ma branche avait été créée après la mise à jour de `main`.*
+![alt text](./docs/afterMerge.png)
 
 ---
 
