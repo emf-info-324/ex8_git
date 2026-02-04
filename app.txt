@@ -1,1 +1,3 @@
-Hello world !
+TITLE: Demo App
+Hello World
+END
